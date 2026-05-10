@@ -444,7 +444,7 @@
   }
 
   .emp-info { flex: 1; margin-right: 12px; }
-  .emp-name { font-size: 14px; font-weight: 600; }
+  .emp-name { font-size: 16px; font-weight: 700; color: #ffffff; }
   .emp-dept { font-size: 12px; color: var(--text2); }
 
   /* ── STATS ── */
@@ -663,13 +663,13 @@
     .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
   .group-label {
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text3);
+    color: #ffffff;
     margin-bottom: 12px;
-    margin-top: 20px;
+    margin-top: 24px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
   }
 </style>
 </head>
@@ -821,6 +821,7 @@ const USERS = [
   // HR
   { email: 'dana.hait@robotican.net', name: 'דנה הייט', role: 'hr', dept: 'HR' },
   { email: 'dana.test@robotican.net', name: 'דנה הייט (טסט)', role: 'employee', dept: 'HR' },
+  { email: 'manager.test@robotican.net', name: 'מנהל טסט', role: 'manager', dept: 'HR', team: ['dana.test@robotican.net','manager.test@robotican.net'] },
 
   // אופיר CFOO - מנהל תפעול
   { email: 'ofir@robotican.net', name: 'אופיר בוסתן', role: 'manager', dept: 'תפעול',
@@ -1095,9 +1096,60 @@ function logout() {
 //  INIT
 // ═══════════════════════════════
 
+
+// ═══════════════════════════════
+//  IMPORT GOALS FROM EXCEL
+// ═══════════════════════════════
+
+const IMPORTED_GOALS = [
+  // ── תוכנה ──
+  {id:'g_import_1',employeeEmail:'daniel.lilintal@robotican.net',desc:"פיתוח בקרה ואלגוריתמים לאוטונומיה (פרויקט ג) ברמת איכות ואמינות גבוהה לאספקה",kpi:"גרסת תוכנה יציבה לפרויקט ג",dueDate:'2026-09-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'g_import_2',employeeEmail:'daniel.lilintal@robotican.net',desc:"שיתוף ידע וניסיון עם עובדים חדשים בתחומי בקרה ותוכנה לשיפור עבודת הצוות",kpi:"הצגת סילבוס קורס לבחירתו",dueDate:'2026-09-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'g_import_3',employeeEmail:'ziv.haron@robotican.net',desc:"העמקת הבנה בארכיטקטורה ושיפור הראייה המערכתית; הרחבת אחריות מעבר לממשק משתמש לפרויקטים חדשים",kpi:"ביצוע משימת פיתוח אחת לפחות שאינה ממשק משתמש; הגשת מסמך אפיון ארכיטקטוני",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'g_import_4',employeeEmail:'ziv.haron@robotican.net',desc:"חיזוק הביטחון המקצועי והעצמאות; העמקת ההשתלבות בצוות תוך שיפור איכות הביצוע",kpi:"שיפור מדיד בעצמאות ואיכות ביצוע",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'g_import_5',employeeEmail:'omer.wolfson@robotican.net',desc:"השלמת אינטגרציה של חוגי הבקרה לפרויקט ג; לימוד כלי PB ופיתוח חוגי בקרה ייעודיים",kpi:"הטמעה מוצלחת ב-PB",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'g_import_6',employeeEmail:'omer.wolfson@robotican.net',desc:"שיפור תקשורת מול גורמים שונים, חיזוק מיומנויות תיעוד והצגת ידע הנדסי לצוות",kpi:"ביצוע מצגת טכנית או מסמך תיעוד הנדסי לצוות",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  // ── מכירות ──
+  {id:'gi_s1',employeeEmail:'gal.roberman@robotican.net',desc:"מכירה והדגמות ב-6 מדינות יעד חדשות (אנגליה, צרפת, ספרד, יוון, מקדוניה). שליטה במכירת כלל מוצרי החברה",kpi:"ביצוע הדגמות ב-6 המדינות; סגירת עסקאות ב-3 מדינות לפחות",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_s2',employeeEmail:'gal.roberman@robotican.net',desc:"קורס ניהול משא ומתן. הרחבת מיומנויות מכירה לכלל סל המוצרים לפי דרישת לקוח",kpi:"סיום קורס ניהול משא ומתן",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_s3',employeeEmail:'shahaf.shamir@robotican.net',desc:"סגירת 3 פרויקטי ספירה למדינות זרות. מכירת תרנגול בעת הצורך בהדגמות וטיסות חול",kpi:"סגירת 3 חוזי ספירה בחול; ביצוע עבודת מכירה עצמאית בחציון ב",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_s4',employeeEmail:'shahaf.shamir@robotican.net',desc:"למידת תהליכי מכירה לעומק והתמקצעות בעבודה מול מפיצים",kpi:"הוכחת יכולת בחציון א לפני יציאה לקורס",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  // ── טכני ──
+  {id:'gi_t1',employeeEmail:'asaf.barsheshet@robotican.net',desc:"הובלה של פרויקט בפן התפעולי באופן עצמאי: בכל הדיונים, אבני דרך ואחריות מא עד ת",kpi:"הובלת פרויקט אחד לפחות לסיום מוצלח ועמידה בכל אבני הדרך",dueDate:'2026-06-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_t2',employeeEmail:'asaf.barsheshet@robotican.net',desc:"העמקת ידע טכני רחב בכל פלטפורמות החברה (רחפנים וטיסנים) בדגש על תוכנה, בקרה ומכאניקה",kpi:"הובלת פרויקט אחד לפחות לסיום מוצלח",dueDate:'2026-06-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_t3',employeeEmail:'maor.cohen@robotican.net',desc:"מעורבות בתחומי אלקטרוניקה וחשמל ב-2 פרויקטים מההתחלה. סיום קורס 3 מעשי בדרום",kpi:"סיום הקורס המעשי; הטסה עצמאית של מערכת תרנגול בניסוי",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_t4',employeeEmail:'ignacio@robotican.net',desc:"פתרון הנדסי עבור 3 חלקים - מתן מענה לייצור תוך הבטחה שהקרדיט ילך אליו",kpi:"הצגת 3 פתרונות שזכו לקרדיט רשמי; תעודת סיום קורס סוליד",dueDate:'2026-07-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_t5',employeeEmail:'yuval.nakar@robotican.net',desc:"הובלת תכן הנדסי של 2 פרויקטים (אחד מאבטיפוס למוצר) מול כל המחלקות הרלוונטיות",kpi:"עמידה בלוז ובאבני הדרך של הפרויקט הראשון; בחירת קורס ואישורו",dueDate:'2026-09-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_t6',employeeEmail:'shai.goldin@robotican.net',desc:"למידת הטסת טיסנים ורחפני רייסר (כולל בניית אחד לאימון ביתי, פירוק והרכבה של תרנגול)",kpi:"הטסה מוצלחת של רייסר וטיסן בניסוי; ביצוע הדגמה מוצלחת באנגלית מול לקוח",dueDate:'2026-10-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  // ── הנדסה צוות שחר ──
+  {id:'gi_e1',employeeEmail:'osher.wyler@robotican.net',desc:"העמקת הכרות עם עולם התוכנה וה-ROS; חיזוק התממשקות פרויקטים בין תוכנה והנדסה",kpi:"עמידה בלוז של פרויקט נבחר; הובלת חלק טכני בפגישת לקוח",dueDate:'2026-10-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e2',employeeEmail:'roie.huri@robotican.net',desc:"כניסה לצד האלקטרוני של גימבלים ופרוטוקולי תקשורת; הובלת תכנון גימבל",kpi:"תכנון עצמאי של גימבל (בכפוף לפידבק); עבודה לפי תיעוד משימות",dueDate:'2026-11-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  // ── הנדסה ──
+  {id:'gi_e3',employeeEmail:'pavel.paster@robotican.net',desc:"פיתוח והתאמת אלגוריתמים (לידר, תרנגול); הכשרת העובדים החדשים בצוות למשימות צפויות ובלתי צפויות",kpi:"סיום תוכנית הכשרה ל-2 עובדים; השתתפות בפגישות לקוח",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e4',employeeEmail:'ofek.moyal@robotican.net',desc:"שילוב בפרויקטי פיתוח חדשים להחזרת העניין והסיפוק המקצועי",kpi:"הובלת חלק הנדסי ב-2 פרויקטי פיתוח פעילים",dueDate:'2026-06-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e5',employeeEmail:'shahar.frenkel@robotican.net',desc:"שיפור עבודה מול לקוחות: ביצוע שיחות לקוח משותפות עם נדיב וקבלת פידבק לשיפור",kpi:"ביצוע 3 סבבי פידבק מתועדים לצוות; 3 שיחות לקוח מול נדיב",dueDate:'2026-09-30',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e6',employeeEmail:'nadav.bensimon@robotican.net',desc:"כניסה לתחום התוכנה ובקרי טיסה; אימון הטסה (פיזי וסימולטור) פעם בשבועיים",kpi:"מתן פידבק חודשי על באגים בתוכנה; מעבר מבחן הטסה פנימי",dueDate:'2026-12-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e7',employeeEmail:'niv.aviram@robotican.net',desc:"ישיבה עם שאר המהנדסים בצוות לקבלת תמונה מקיפה של הפרויקט מעבר לעולם החשמל",kpi:"בחירת קורס עד סוף מרץ; השתתפות ב-3 ישיבות סנכרון רב-תחומיות",dueDate:'2026-05-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e8',employeeEmail:'evyatar.aharonovich@robotican.net',desc:"סגירת מעגל של תהליכי ייצור (ביקורי ספקים) והמשך עבודה על ספריית הספקים",kpi:"ביצוע 3 ביקורי ספקים; הגשת ספריית ספקים מעודכנת; הצגת 2 חלופות תכנון",dueDate:'2026-07-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+  {id:'gi_e9',employeeEmail:'ofir.david@robotican.net',desc:"שיפור ידע בתוכנה ואלגוריתמיקה דרך עבודה צמודה עם דניאל לילנטל",kpi:"קיום פגישות סנכרון קבועות; תיאום החלפת רכב חודש מראש",dueDate:'2026-08-31',status:'not-started',progress:0,comments:[],createdBy:'dana.hait@robotican.net',createdAt:'10/05/2026'},
+];
+
+async function importGoalsIfNeeded() {
+  // Check if already imported
+  const existing = goals.map(g => g.id);
+  const toImport = IMPORTED_GOALS.filter(g => !existing.includes(g.id));
+  if (toImport.length === 0) return;
+  
+  const merged = [...goals, ...toImport];
+  await saveGoals(merged);
+  goals = merged;
+  showToast(`יובאו ${toImport.length} יעדים חדשים ✓`);
+}
+
 async function initApp() {
   goals = await loadGoals();
   evaluations = await loadEvals();
+  await importGoalsIfNeeded();
   if (currentUser.role === 'employee') renderEmployeeView();
   else renderManagerView();
 }
@@ -1608,7 +1660,7 @@ async function renderEvalsView() {
   if (currentUser.role === 'employee') {
     renderEmployeeEvalView(el);
   } else {
-    renderManagerEvalView(el);
+    renderManagerOrHREvalView(el);
   }
 }
 
@@ -1663,6 +1715,34 @@ function renderSelfEvalSummary(ev) {
         <button class="btn btn-ghost btn-sm" onclick="startSelfEval(true)">עריכה</button>
       </div>
     </div>`;
+}
+
+// ── MANAGER/HR COMBINED VIEW ──
+let mgrSubTab = 'self'; // 'self' or 'team'
+
+function renderManagerOrHREvalView(el) {
+  el.innerHTML = `
+    <div class="tabs" style="margin-bottom:24px;">
+      <button class="tab ${mgrSubTab==='self'?'active':''}" onclick="switchMgrSubTab('self')">📝 הערכה עצמית שלי</button>
+      <button class="tab ${mgrSubTab==='team'?'active':''}" onclick="switchMgrSubTab('team')">👥 הערכת הצוות</button>
+    </div>
+    <div id="mgr-sub-content"></div>
+  `;
+  renderMgrSubContent();
+}
+
+function switchMgrSubTab(tab) {
+  mgrSubTab = tab;
+  renderManagerOrHREvalView(document.getElementById('view-evals'));
+}
+
+function renderMgrSubContent() {
+  const el = document.getElementById('mgr-sub-content');
+  if (mgrSubTab === 'self') {
+    renderEmployeeEvalView(el);
+  } else {
+    renderManagerEvalView(el);
+  }
 }
 
 // ── MANAGER/HR EVAL VIEW ──
@@ -1722,9 +1802,51 @@ function openEmpEvalDetail(email) {
   const empGoals = goals.filter(g => g.employeeEmail === email);
 
   const el = document.getElementById('view-evals');
+  let detailSubTab = 'overview';
+
+  function renderEmpDetail(tab) {
+    detailSubTab = tab;
+    const tabsHtml = `
+      <div class="tabs" style="margin-bottom:20px;">
+        <button class="tab ${tab==='overview'?'active':''}" onclick="renderEmpDetail('overview')">סיכום</button>
+        ${self ? `<button class="tab ${tab==='self_full'?'active':''}" onclick="renderEmpDetail('self_full')">שאלון עצמי מלא</button>` : ''}
+        ${mgr ? `<button class="tab ${tab==='mgr_full'?'active':''}" onclick="renderEmpDetail('mgr_full')">הערכת מנהל מלאה</button>` : ''}
+      </div>`;
+
+    let bodyHtml = '';
+    if (tab === 'overview') {
+      bodyHtml = `
+        ${empGoals.length > 0 ? `
+        <div class="card eval-section">
+          <div class="eval-section-title">יעדים</div>
+          ${empGoals.map(g => `
+            <div class="summary-row">
+              <span>${g.desc}</span>
+              <span style="font-weight:700;color:${g.status==='done'?'#22c55e':'var(--accent2)'};">${g.progress||0}%</span>
+            </div>`).join('')}
+        </div>` : ''}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="eval-section-title">הערכה עצמית</div>
+            ${self ? renderCompactEvalSummary(self, 'self') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
+          </div>
+          <div class="card">
+            <div class="eval-section-title">הערכת מנהל</div>
+            ${mgr ? renderCompactEvalSummary(mgr, 'manager') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
+          </div>
+        </div>
+        ${self && mgr ? renderComparison(self, mgr) : ''}`;
+    } else if (tab === 'self_full' && self) {
+      bodyHtml = renderFullSelfEval(self);
+    } else if (tab === 'mgr_full' && mgr) {
+      bodyHtml = renderFullMgrEval(mgr);
+    }
+
+    document.getElementById('emp-detail-body').innerHTML = tabsHtml + bodyHtml;
+  }
+
   el.innerHTML = `
     <button class="back-btn" onclick="renderEvalsView()">← חזרה לרשימה</button>
-
     <div class="section-header">
       <div>
         <div class="section-title">${emp.name}</div>
@@ -1734,30 +1856,9 @@ function openEmpEvalDetail(email) {
         ${mgr ? 'עריכת הערכת מנהל' : 'מלא הערכת מנהל'}
       </button>
     </div>
-
-    ${empGoals.length > 0 ? `
-    <div class="card eval-section">
-      <div class="eval-section-title">יעדים</div>
-      ${empGoals.map(g => `
-        <div class="summary-row">
-          <span>${g.desc}</span>
-          <span style="font-weight:700;color:${g.status==='done'?'#22c55e':'var(--accent2)'};">${g.progress||0}%</span>
-        </div>`).join('')}
-    </div>` : ''}
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="card">
-        <div class="eval-section-title">הערכה עצמית</div>
-        ${self ? renderCompactEvalSummary(self, 'self') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
-      </div>
-      <div class="card">
-        <div class="eval-section-title">הערכת מנהל</div>
-        ${mgr ? renderCompactEvalSummary(mgr, 'manager') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
-      </div>
-    </div>
-
-    ${self && mgr ? renderComparison(self, mgr) : ''}
+    <div id="emp-detail-body"></div>
   `;
+  renderEmpDetail('overview');
 }
 
 function renderCompactEvalSummary(ev, type) {
@@ -1775,6 +1876,85 @@ function renderCompactEvalSummary(ev, type) {
     (ev.text?.ceo ? `<div style="margin-top:12px;font-size:12px;color:var(--text2);"><strong>שולחן המנכ"ל:</strong> ${ev.text.ceo}</div>` : '');
 }
 
+
+function renderFullSelfEval(ev) {
+  const sections = [
+    { title: 'הערכה מקצועית', questions: SELF_PROF, textKey: 'profDetail', scale: '1=טעון שיפור | 2=בינוני | 3=טוב | 4=מעולה' },
+    { title: 'פיתוח אישי וסביבת עבודה', questions: SELF_DEV, textKey: 'devDetail', scale: '1=לא מסכים/ה כלל | 2=לא מסכים/ה | 3=מסכים/ה | 4=מסכים/ה מאוד' },
+    { title: 'תרבות ארגונית ושביעות רצון', questions: SELF_CULTURE, textKey: 'cultureDetail', scale: '1=לא מסכים/ה כלל | 2=לא מסכים/ה | 3=מסכים/ה | 4=מסכים/ה מאוד' },
+  ];
+
+  let html = `<div style="font-size:12px;color:var(--text3);margin-bottom:16px;">הוגש ב-${ev.submittedAt}</div>`;
+
+  sections.forEach(sec => {
+    html += `<div class="card eval-section">
+      <div class="eval-section-title">${sec.title}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">${sec.scale}</div>`;
+    sec.questions.forEach(q => {
+      const score = ev.ratings?.[q.id];
+      const scoreColors = { 1:'background:#7f1d1d;color:#fca5a5', 2:'background:#78350f;color:#fcd34d', 3:'background:#14532d;color:#86efac', 4:'background:#1e3a5f;color:#93c5fd' };
+      const scoreLabels = { 1:'טעון שיפור', 2:'בינוני', 3:'טוב', 4:'מעולה' };
+      html += `<div class="summary-row">
+        <span style="font-size:13px;">${q.label}${q.sub?`<br><small style="color:var(--text3)">${q.sub}</small>`:''}</span>
+        ${score ? `<span class="summary-score" style="${scoreColors[score]}">${score} · ${scoreLabels[score]}</span>` : '<span style="color:var(--text3);font-size:12px;">לא נענה</span>'}
+      </div>`;
+    });
+    if (ev.text?.[sec.textKey]) {
+      html += `<div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:8px;font-size:13px;color:var(--text2);">
+        <strong>פירוט:</strong> ${ev.text[sec.textKey]}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  if (ev.text?.ceo) {
+    html += `<div class="card eval-section">
+      <div class="eval-section-title">🚀 שולחן המנכ"ל</div>
+      <div style="font-size:13px;white-space:pre-wrap;">${ev.text.ceo}</div>
+    </div>`;
+  }
+  return html;
+}
+
+function renderFullMgrEval(ev) {
+  const sections = [
+    { title: 'הערכה מקצועית', questions: MGR_PROF },
+    { title: 'כישורים אישיים וחברתיים', questions: MGR_PERSONAL },
+    { title: 'עבודה עם לקוחות/ספקים', questions: MGR_CUSTOMER },
+  ];
+
+  let html = `<div style="font-size:12px;color:var(--text3);margin-bottom:16px;">הוגש ב-${ev.submittedAt}</div>`;
+
+  if (ev.text?.responsibilities) {
+    html += `<div class="card eval-section">
+      <div class="eval-section-title">תחומי אחריות</div>
+      <div style="font-size:13px;">${ev.text.responsibilities}</div>
+    </div>`;
+  }
+
+  sections.forEach(sec => {
+    html += `<div class="card eval-section">
+      <div class="eval-section-title">${sec.title}</div>`;
+    sec.questions.forEach(q => {
+      const score = ev.ratings?.[q.id];
+      const scoreColors = { 1:'background:#7f1d1d;color:#fca5a5', 2:'background:#78350f;color:#fcd34d', 3:'background:#14532d;color:#86efac', 4:'background:#1e3a5f;color:#93c5fd' };
+      const scoreLabels = { 1:'טעון שיפור', 2:'בינוני', 3:'טוב', 4:'מעולה' };
+      html += `<div class="summary-row">
+        <span style="font-size:13px;">${q.label}<br><small style="color:var(--text3)">${q.sub}</small></span>
+        ${score ? `<span class="summary-score" style="${scoreColors[score]}">${score} · ${scoreLabels[score]}</span>` : '<span style="color:var(--text3);font-size:12px;">לא נענה</span>'}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  if (ev.text?.nextProf || ev.text?.nextPersonal) {
+    html += `<div class="card eval-section">
+      <div class="eval-section-title">יעדים למחצית הבאה</div>
+      ${ev.text?.nextProf ? `<div style="margin-bottom:12px;"><strong style="font-size:12px;color:var(--text2);">יעד מקצועי:</strong><div style="font-size:13px;margin-top:4px;">${ev.text.nextProf}</div></div>` : ''}
+      ${ev.text?.nextPersonal ? `<div><strong style="font-size:12px;color:var(--text2);">יעד אישי:</strong><div style="font-size:13px;margin-top:4px;">${ev.text.nextPersonal}</div></div>` : ''}
+    </div>`;
+  }
+  return html;
+}
 function renderComparison(self, mgr) {
   const pairs = [
     ['ידע מקצועי', 'sp1', 'mp1'],
@@ -1952,10 +2132,30 @@ function stepNav(step) {
     </div>`;
 }
 
-function selfStep(step) {
-  // Save current step text fields
+function selfStep(targetStep) {
+  // Validate current step ratings before moving forward
+  if (targetStep > selfEvalStep) {
+    const stepQuestions = {
+      1: SELF_PROF,
+      2: SELF_DEV,
+      3: SELF_CULTURE,
+    };
+    const qs = stepQuestions[selfEvalStep];
+    if (qs) {
+      const unanswered = qs.filter(q => !evalFormData.ratings?.[q.id]);
+      if (unanswered.length > 0) {
+        showToast(`נא לענות על כל השאלות לפני המעבר (${unanswered.length} שאלות חסרות)`);
+        // Highlight unanswered
+        unanswered.forEach(q => {
+          const el = document.getElementById('stars-' + q.id);
+          if (el) el.style.outline = '2px solid #ef4444';
+        });
+        return;
+      }
+    }
+  }
   saveCurrentStepText();
-  selfEvalStep = step;
+  selfEvalStep = targetStep;
   renderSelfEvalForm();
 }
 
@@ -1983,8 +2183,18 @@ async function submitSelfEval() {
   evaluations = evaluations.filter(e => !(e.employeeEmail === currentUser.email && e.type === 'self' && e.period === EVAL_PERIOD));
   evaluations.push(evalFormData);
   await saveEvals(evaluations);
-  showToast('הערכה עצמית הוגשה בהצלחה ✓');
-  renderEvalsView();
+  
+  // Show success screen
+  const el = document.getElementById('view-evals');
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;">
+      <div style="font-size:72px;margin-bottom:24px;">✅</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:12px;">ההערכה העצמית הוגשה בהצלחה!</div>
+      <div style="font-size:16px;color:var(--text2);margin-bottom:8px;">תודה ${currentUser.name} על מילוי הערכה עצמית עבור ${EVAL_PERIOD}</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:32px;">הוגש ב-${evalFormData.submittedAt}</div>
+      <button class="btn btn-primary" onclick="renderEvalsView()">חזרה לדף הערכות</button>
+    </div>
+  `;
 }
 
 // ═══════════════════════════════
@@ -1993,7 +2203,7 @@ async function submitSelfEval() {
 
 let mgrEvalEmail = null;
 let mgrEvalStep = 1;
-const MGR_TOTAL_STEPS = 3;
+const MGR_TOTAL_STEPS = 2;
 
 function startManagerEval(email) {
   mgrEvalEmail = email;
@@ -2020,9 +2230,9 @@ function renderManagerEvalForm() {
     <div style="color:var(--text2);font-size:13px;margin-bottom:20px;">${emp.dept} · ${EVAL_PERIOD}</div>
 
     <div class="step-indicator">
-      ${[1,2,3].map(s => `
+      ${[1,2].map(s => `
         <div class="step-dot ${mgrEvalStep>s?'done':mgrEvalStep===s?'active':''}">${mgrEvalStep>s?'✓':s}</div>
-        ${s<3?'<div class="step-line"></div>':''}`).join('')}
+        ${s<2?'<div class="step-line"></div>':''}`).join('')}
     </div>
 
     <div id="mgr-form-content"></div>
@@ -2065,19 +2275,10 @@ function renderMgrStep() {
         </div>
       </div>
       ${mgrStepNav(2)}`;
-  } else if (mgrEvalStep === 3) {
-    el.innerHTML = `
-      <div class="card">
-        <div class="eval-section-title">יעדי-על למחצית הבאה</div>
-        <div class="field">
-          <label>יעד מקצועי — ברור ומדיד</label>
-          <textarea id="mgr-next-prof" placeholder="הגדר/י יעד מקצועי. כלול: אחוזי שיפור, מספרים, זמנים...">${evalFormData.text?.nextProf||''}</textarea>
-        </div>
-        <div class="field">
-          <label>יעד פיתוח אישי</label>
-          <textarea id="mgr-next-personal" placeholder="הגדר יעד פיתוח אישי — כישור מקצועי, התנהגותי או אישי. כלול מדדי הצלחה ולוח זמנים...">${evalFormData.text?.nextPersonal||''}</textarea>
-        </div>
-      </div>
+  }
+  // Add summary at end of step 2
+  if (mgrEvalStep === 2) {
+    const summaryHtml = `
       <div class="card" style="margin-top:16px;">
         <div class="eval-section-title">סיכום ממוצעים</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
@@ -2085,8 +2286,8 @@ function renderMgrStep() {
           <div class="stat-card"><div class="stat-num" style="font-size:22px;color:var(--accent2)">${avgScore(evalFormData.ratings,MGR_PERSONAL.map(q=>q.id))||'—'}</div><div class="stat-label">אישי/חברתי</div></div>
           <div class="stat-card"><div class="stat-num" style="font-size:22px;color:var(--accent2)">${avgScore(evalFormData.ratings,MGR_CUSTOMER.map(q=>q.id))||'—'}</div><div class="stat-label">לקוחות</div></div>
         </div>
-      </div>
-      ${mgrStepNav(3)}`;  
+      </div>`;
+    el.innerHTML += summaryHtml;
   }
 
   restoreRatingSelections();
@@ -2102,9 +2303,27 @@ function mgrStepNav(step) {
     </div>`;
 }
 
-function mgrStep(step) {
+function mgrStep(targetStep) {
+  if (targetStep > mgrEvalStep) {
+    const stepQuestions = {
+      1: MGR_PROF,
+      2: [],
+    };
+    const qs = stepQuestions[mgrEvalStep];
+    if (qs) {
+      const unanswered = qs.filter(q => !evalFormData.ratings?.[q.id]);
+      if (unanswered.length > 0) {
+        showToast(`נא לענות על כל השאלות לפני המעבר (${unanswered.length} שאלות חסרות)`);
+        unanswered.forEach(q => {
+          const el = document.getElementById('stars-' + q.id);
+          if (el) el.style.outline = '2px solid #ef4444';
+        });
+        return;
+      }
+    }
+  }
   saveMgrStepText();
-  mgrEvalStep = step;
+  mgrEvalStep = targetStep;
   renderManagerEvalForm();
 }
 
@@ -2119,7 +2338,7 @@ function saveMgrStepText() {
     'mgr-goal-personal-desc':'goalPersonalDesc','mgr-goal-personal-kpi':'goalPersonalKpi',
     'mgr-goal-personal-result':'goalPersonalResult','mgr-goal-personal-pct':'goalPersonalPct',
     'mgr-goal-personal-rating':'goalPersonalRating',
-    'mgr-next-prof':'nextProf','mgr-next-personal':'nextPersonal',
+    // goals removed
   };
   Object.entries(fields).forEach(([id, key]) => {
     const el = document.getElementById(id);
@@ -2133,8 +2352,21 @@ async function submitManagerEval() {
   evaluations = evaluations.filter(e => !(e.employeeEmail === mgrEvalEmail && e.type === 'manager' && e.period === EVAL_PERIOD));
   evaluations.push(evalFormData);
   await saveEvals(evaluations);
-  showToast('הערכת מנהל הוגשה בהצלחה ✓');
-  openEmpEvalDetail(mgrEvalEmail);
+  
+  const emp = USERS.find(u => u.email === mgrEvalEmail);
+  const el = document.getElementById('view-evals');
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;">
+      <div style="font-size:72px;margin-bottom:24px;">✅</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:12px;">הערכת המנהל הוגשה בהצלחה!</div>
+      <div style="font-size:16px;color:var(--text2);margin-bottom:8px;">ההערכה עבור ${emp?.name || ''} נשמרה</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:32px;">הוגש ב-${evalFormData.submittedAt}</div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-ghost" onclick="openEmpEvalDetail('${mgrEvalEmail}')">חזרה לפרופיל העובד</button>
+        <button class="btn btn-primary" onclick="renderEvalsView()">חזרה לרשימה</button>
+      </div>
+    </div>
+  `;
 }
 
 </script>
