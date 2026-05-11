@@ -1802,49 +1802,6 @@ function openEmpEvalDetail(email) {
   const empGoals = goals.filter(g => g.employeeEmail === email);
 
   const el = document.getElementById('view-evals');
-  let detailSubTab = 'overview';
-
-  function renderEmpDetail(tab) {
-    detailSubTab = tab;
-    const tabsHtml = `
-      <div class="tabs" style="margin-bottom:20px;">
-        <button class="tab ${tab==='overview'?'active':''}" onclick="renderEmpDetail('overview')">סיכום</button>
-        ${self ? `<button class="tab ${tab==='self_full'?'active':''}" onclick="renderEmpDetail('self_full')">שאלון עצמי מלא</button>` : ''}
-        ${mgr ? `<button class="tab ${tab==='mgr_full'?'active':''}" onclick="renderEmpDetail('mgr_full')">הערכת מנהל מלאה</button>` : ''}
-      </div>`;
-
-    let bodyHtml = '';
-    if (tab === 'overview') {
-      bodyHtml = `
-        ${empGoals.length > 0 ? `
-        <div class="card eval-section">
-          <div class="eval-section-title">יעדים</div>
-          ${empGoals.map(g => `
-            <div class="summary-row">
-              <span>${g.desc}</span>
-              <span style="font-weight:700;color:${g.status==='done'?'#22c55e':'var(--accent2)'};">${g.progress||0}%</span>
-            </div>`).join('')}
-        </div>` : ''}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="card">
-            <div class="eval-section-title">הערכה עצמית</div>
-            ${self ? renderCompactEvalSummary(self, 'self') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
-          </div>
-          <div class="card">
-            <div class="eval-section-title">הערכת מנהל</div>
-            ${mgr ? renderCompactEvalSummary(mgr, 'manager') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
-          </div>
-        </div>
-        ${self && mgr ? renderComparison(self, mgr) : ''}`;
-    } else if (tab === 'self_full' && self) {
-      bodyHtml = renderFullSelfEval(self);
-    } else if (tab === 'mgr_full' && mgr) {
-      bodyHtml = renderFullMgrEval(mgr);
-    }
-
-    document.getElementById('emp-detail-body').innerHTML = tabsHtml + bodyHtml;
-  }
-
   el.innerHTML = `
     <button class="back-btn" onclick="renderEvalsView()">← חזרה לרשימה</button>
     <div class="section-header">
@@ -1858,7 +1815,9 @@ function openEmpEvalDetail(email) {
     </div>
     <div id="emp-detail-body"></div>
   `;
-  renderEmpDetail('overview');
+  
+  currentDetailEmail = email;
+  renderEmpDetailGlobal('overview');
 }
 
 function renderCompactEvalSummary(ev, type) {
@@ -1955,6 +1914,55 @@ function renderFullMgrEval(ev) {
   }
   return html;
 }
+
+let currentDetailEmail = null;
+
+function renderEmpDetailGlobal(tab) {
+  const email = currentDetailEmail;
+  const emp = USERS.find(u => u.email === email);
+  const self = getEval(email, 'self');
+  const mgr = getEval(email, 'manager');
+  const empGoals = goals.filter(g => g.employeeEmail === email);
+
+  const tabsHtml = `
+    <div class="tabs" style="margin-bottom:20px;">
+      <button class="tab ${tab==='overview'?'active':''}" onclick="renderEmpDetailGlobal('overview')">סיכום</button>
+      ${self ? `<button class="tab ${tab==='self_full'?'active':''}" onclick="renderEmpDetailGlobal('self_full')">שאלון עצמי מלא</button>` : ''}
+      ${mgr ? `<button class="tab ${tab==='mgr_full'?'active':''}" onclick="renderEmpDetailGlobal('mgr_full')">הערכת מנהל מלאה</button>` : ''}
+    </div>`;
+
+  let bodyHtml = '';
+  if (tab === 'overview') {
+    bodyHtml = `
+      ${empGoals.length > 0 ? `
+      <div class="card eval-section">
+        <div class="eval-section-title">יעדים</div>
+        ${empGoals.map(g => `
+          <div class="summary-row">
+            <span>${g.desc}</span>
+            <span style="font-weight:700;color:${g.status==='done'?'#22c55e':'var(--accent2)'};">${g.progress||0}%</span>
+          </div>`).join('')}
+      </div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card">
+          <div class="eval-section-title">הערכה עצמית</div>
+          ${self ? renderCompactEvalSummary(self, 'self') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
+        </div>
+        <div class="card">
+          <div class="eval-section-title">הערכת מנהל</div>
+          ${mgr ? renderCompactEvalSummary(mgr, 'manager') : '<div style="color:var(--text3);font-size:13px;">טרם הוגש</div>'}
+        </div>
+      </div>
+      ${self && mgr ? renderComparison(self, mgr) : ''}`;
+  } else if (tab === 'self_full' && self) {
+    bodyHtml = renderFullSelfEval(self);
+  } else if (tab === 'mgr_full' && mgr) {
+    bodyHtml = renderFullMgrEval(mgr);
+  }
+
+  document.getElementById('emp-detail-body').innerHTML = tabsHtml + bodyHtml;
+}
+
 function renderComparison(self, mgr) {
   const pairs = [
     ['ידע מקצועי', 'sp1', 'mp1'],
