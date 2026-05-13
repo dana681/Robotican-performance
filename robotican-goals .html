@@ -743,6 +743,30 @@
   </main>
 </div>
 
+
+<!-- MODAL: Personal Goal -->
+<div class="overlay" id="modal-personal-goal">
+  <div class="modal">
+    <div class="modal-title">יעד פיתוח אישי</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">הצע/י יעד אישי — יידון ויאושר עם המנהל/ת שלך בשיחת המשוב</div>
+
+    <div class="field">
+      <label>מה היעד שלך?</label>
+      <textarea id="personal-goal-desc" rows="3" placeholder="למשל: להעמיק את הידע שלי בתחום X, לשפר את מיומנויות Y..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>איך תמדוד הצלחה?</label>
+      <input type="text" id="personal-goal-kpi" placeholder="למשל: סיום קורס, הצגת פרויקט, קבלת פידבק חיובי..." />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-personal-goal')">ביטול</button>
+      <button class="btn btn-primary" onclick="savePersonalGoal()">שמירה</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Add/Edit Goal -->
 <div class="overlay" id="modal-goal">
   <div class="modal">
@@ -1150,8 +1174,79 @@ async function initApp() {
   goals = await loadGoals();
   evaluations = await loadEvals();
   await importGoalsIfNeeded();
-  if (currentUser.role === 'employee') renderEmployeeView();
-  else renderManagerView();
+  renderHomeScreen();
+}
+
+function renderHomeScreen() {
+  // Hide tabs initially
+  document.getElementById('app-tabs').style.display = 'none';
+  document.getElementById('view-manager').innerHTML = '';
+  document.getElementById('view-employee').innerHTML = '';
+  document.getElementById('view-evals').style.display = 'none';
+
+  const isEmployee = currentUser.role === 'employee';
+  const isMgr = currentUser.role === 'manager';
+  const isHR = currentUser.role === 'hr';
+
+  const steps = isEmployee ? [
+    { icon: '🎯', title: 'יעד פיתוח אישי', desc: 'הצע/י יעד אישי שחשוב לך להשיג במחצית הקרובה' },
+    { icon: '📝', title: 'הערכה עצמית', desc: 'ענה/י על 3 שאלות קצרות על החציון שעבר' },
+    { icon: '💬', title: 'שיחת משוב', desc: 'קיים/י שיחת משוב עם המנהל שלך' },
+  ] : [
+    { icon: '🎯', title: 'יעד מקצועי', desc: 'הגדר/י יעד מקצועי מדיד לכל עובד בצוות' },
+    { icon: '📝', title: 'הערכת מנהל', desc: 'ענה/י על 2 שאלות קצרות לכל עובד' },
+    { icon: '💬', title: 'שיחת משוב', desc: 'קיים/י שיחת משוב עם כל עובד בצוות' },
+  ];
+
+  const mainEl = document.getElementById('view-manager') || document.getElementById('view-employee');
+  document.getElementById('view-manager').innerHTML = `
+    <div style="max-width:640px;margin:0 auto;padding:20px 0;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <div style="font-size:42px;margin-bottom:16px;">👋</div>
+        <div style="font-size:26px;font-weight:800;margin-bottom:8px;">שלום ${currentUser.name}!</div>
+        <div style="font-size:16px;color:var(--text2);">ברוכים הבאים לתהליך הערכת המחצית H2/2026</div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div style="font-size:14px;color:var(--text2);line-height:1.8;">
+          ${isEmployee
+            ? 'בתהליך זה תתבקש/י להציע יעד פיתוח אישי ולענות על 3 שאלות קצרות על החציון שעבר. לאחר מכן תקיים/י שיחת משוב עם המנהל/ת שלך בה תקבעו יחד את היעד המקצועי.'
+            : isHR
+            ? 'כ-HR תוכל/י לצפות בכל ההערכות והיעדים של כל העובדים, ולנהל את תהליך ההערכה מקצה לקצה.'
+            : 'בתהליך זה תגדיר/י יעד מקצועי לכל עובד בצוות ותמלא/י הערכה קצרה. היעד יקבע בשיחת משוב יחד עם העובד.'}
+        </div>
+      </div>
+
+      ${!isHR ? `
+      <div style="margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">שלבי התהליך</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${steps.map((s,i) => `
+            <div style="display:flex;align-items:center;gap:16px;background:var(--surface2);border-radius:10px;padding:14px 18px;border:1px solid var(--border);">
+              <div style="font-size:28px;flex-shrink:0;">${s.icon}</div>
+              <div>
+                <div style="font-weight:700;font-size:15px;">${i+1}. ${s.title}</div>
+                <div style="font-size:13px;color:var(--text2);margin-top:2px;">${s.desc}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-primary" style="flex:1;padding:14px;font-size:16px;" onclick="enterApp('goals')">
+          🎯 יעדים
+        </button>
+        <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:16px;" onclick="enterApp('evals')">
+          📋 הערכות
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function enterApp(tab) {
+  document.getElementById('app-tabs').style.display = '';
+  switchTab(tab);
 }
 
 // ═══════════════════════════════
@@ -1235,7 +1330,8 @@ function renderManagerGoals(team, myGoals) {
   for (const [email, empGoals] of Object.entries(byEmp)) {
     const emp = USERS.find(u => u.email === email);
     if (!emp) continue;
-    html += `<div class="group-label">${emp.name} · ${emp.dept}</div>`;
+    const empPersonalGoal = empGoals.find(g => g.isPersonal);
+    html += `<div class="group-label">${emp.name} · ${emp.dept}${empPersonalGoal ? ' <span style="font-size:12px;color:var(--accent);font-weight:400;">🌱 יש יעד אישי</span>' : ''}</div>`;
     empGoals.forEach(g => { html += renderGoalCard(g, true); });
   }
   return html;
@@ -1512,6 +1608,42 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+
+// ── PERSONAL GOAL ──
+function openPersonalGoalForm() {
+  const existing = goals.find(g => g.employeeEmail === currentUser.email && g.isPersonal);
+  document.getElementById('personal-goal-desc').value = existing?.desc || '';
+  document.getElementById('personal-goal-kpi').value = existing?.kpi || '';
+  openModal('modal-personal-goal');
+}
+
+async function savePersonalGoal() {
+  const desc = document.getElementById('personal-goal-desc').value.trim();
+  if (!desc) { showToast('נא למלא תיאור יעד'); return; }
+  const kpi = document.getElementById('personal-goal-kpi').value.trim();
+
+  // Remove existing personal goal
+  goals = goals.filter(g => !(g.employeeEmail === currentUser.email && g.isPersonal));
+
+  goals.push({
+    id: 'personal_' + currentUser.email + '_' + Date.now(),
+    employeeEmail: currentUser.email,
+    desc,
+    kpi,
+    dueDate: '',
+    status: 'not-started',
+    progress: 0,
+    comments: [],
+    isPersonal: true,
+    createdBy: currentUser.email,
+    createdAt: new Date().toLocaleDateString('he-IL'),
+  });
+
+  await saveGoals(goals);
+  closeModal('modal-personal-goal');
+  showToast('יעד אישי נשמר ✓');
+  renderEmployeeView();
+}
 // ═══════════════════════════════
 //  TAB SWITCHING
 // ═══════════════════════════════
@@ -2000,7 +2132,7 @@ function renderComparison(self, mgr) {
 // ═══════════════════════════════
 
 let selfEvalStep = 1;
-const SELF_TOTAL_STEPS = 4;
+const SELF_TOTAL_STEPS = 1;
 
 function startSelfEval(editing = false) {
   const existing = getEval(currentUser.email, 'self');
@@ -2184,6 +2316,34 @@ function saveCurrentStepText() {
   });
 }
 
+
+async function submitSelfEvalSimple() {
+  const q1 = document.getElementById('q1')?.value.trim();
+  const q2 = document.getElementById('q2')?.value.trim();
+  const q3 = document.getElementById('q3')?.value.trim();
+
+  if (!q1) { showToast('נא לענות על שאלה 1'); document.getElementById('q1').style.outline='2px solid #ef4444'; return; }
+  if (!q2) { showToast('נא לענות על שאלה 2'); document.getElementById('q2').style.outline='2px solid #ef4444'; return; }
+  if (!q3) { showToast('נא לענות על שאלה 3'); document.getElementById('q3').style.outline='2px solid #ef4444'; return; }
+
+  evalFormData.text = { q1, q2, q3 };
+  evalFormData.submittedAt = new Date().toLocaleDateString('he-IL');
+  evaluations = evaluations.filter(e => !(e.employeeEmail === currentUser.email && e.type === 'self' && e.period === EVAL_PERIOD));
+  evaluations.push(evalFormData);
+  await saveEvals(evaluations);
+
+  const el = document.getElementById('view-evals');
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;">
+      <div style="font-size:72px;margin-bottom:24px;">✅</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:12px;">ההערכה הוגשה בהצלחה!</div>
+      <div style="font-size:16px;color:var(--text2);margin-bottom:8px;">תודה ${currentUser.name} על מילוי הערכה עבור ${EVAL_PERIOD}</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:32px;">הוגש ב-${evalFormData.submittedAt}</div>
+      <button class="btn btn-primary" onclick="renderEvalsView()">חזרה לדף הערכות</button>
+    </div>
+  `;
+}
+
 async function submitSelfEval() {
   saveCurrentStepText();
   evalFormData.submittedAt = new Date().toLocaleDateString('he-IL');
@@ -2211,7 +2371,7 @@ async function submitSelfEval() {
 
 let mgrEvalEmail = null;
 let mgrEvalStep = 1;
-const MGR_TOTAL_STEPS = 2;
+const MGR_TOTAL_STEPS = 1;
 
 function startManagerEval(email) {
   mgrEvalEmail = email;
@@ -2352,6 +2512,36 @@ function saveMgrStepText() {
     const el = document.getElementById(id);
     if (el) evalFormData.text[key] = el.value;
   });
+}
+
+
+async function submitManagerEvalSimple() {
+  const q1 = document.getElementById('mgr-q1')?.value.trim();
+  const q2 = document.getElementById('mgr-q2')?.value.trim();
+
+  if (!q1) { showToast('נא לענות על שאלה 1'); document.getElementById('mgr-q1').style.outline='2px solid #ef4444'; return; }
+  if (!q2) { showToast('נא לענות על שאלה 2'); document.getElementById('mgr-q2').style.outline='2px solid #ef4444'; return; }
+
+  evalFormData.text = { mgrQ1: q1, mgrQ2: q2 };
+  evalFormData.submittedAt = new Date().toLocaleDateString('he-IL');
+  evaluations = evaluations.filter(e => !(e.employeeEmail === mgrEvalEmail && e.type === 'manager' && e.period === EVAL_PERIOD));
+  evaluations.push(evalFormData);
+  await saveEvals(evaluations);
+
+  const emp = USERS.find(u => u.email === mgrEvalEmail);
+  const el = document.getElementById('view-evals');
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;">
+      <div style="font-size:72px;margin-bottom:24px;">✅</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:12px;">הערכת המנהל הוגשה בהצלחה!</div>
+      <div style="font-size:16px;color:var(--text2);margin-bottom:8px;">ההערכה עבור ${emp?.name || ''} נשמרה</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:32px;">הוגש ב-${evalFormData.submittedAt}</div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-ghost" onclick="openEmpEvalDetail('${mgrEvalEmail}')">חזרה לפרופיל העובד</button>
+        <button class="btn btn-primary" onclick="renderEvalsView()">חזרה לרשימה</button>
+      </div>
+    </div>
+  `;
 }
 
 async function submitManagerEval() {
