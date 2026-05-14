@@ -1348,14 +1348,16 @@ function setFilter(f) {
 
 function renderEmployeeView() {
   const myGoals = goals.filter(g => g.employeeEmail === currentUser.email);
-  const done = myGoals.filter(g => g.status === 'done').length;
-  const avgPct = myGoals.length ? Math.round(myGoals.reduce((s,g) => s + (g.progress||0), 0) / myGoals.length) : 0;
+  const personalGoal = myGoals.find(g => g.isPersonal);
+  const professionalGoals = myGoals.filter(g => !g.isPersonal);
+  const done = professionalGoals.filter(g => g.status === 'done').length;
+  const avgPct = professionalGoals.length ? Math.round(professionalGoals.reduce((s,g) => s + (g.progress||0), 0) / professionalGoals.length) : 0;
 
   document.getElementById('view-employee').innerHTML = `
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-num" style="color:var(--accent2)">${myGoals.length}</div>
-        <div class="stat-label">היעדים שלי</div>
+        <div class="stat-num" style="color:var(--accent2)">${professionalGoals.length}</div>
+        <div class="stat-label">יעדים מקצועיים</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" style="color:var(--green)">${done}</div>
@@ -1367,21 +1369,53 @@ function renderEmployeeView() {
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:20px;border-right:3px solid var(--accent);">
+      <div style="font-size:14px;color:var(--text2);line-height:1.8;">
+        בלשונית זו תמצא/י שני סוגי יעדים:<br><br>
+        🌱 <strong style="color:var(--text);">יעד פיתוח אישי</strong> — יעד שאתה/את מציע/ה. יידון ויאושר עם המנהל/ת שלך בשיחת המשוב.<br><br>
+        🎯 <strong style="color:var(--text);">יעדים מקצועיים</strong> — יעדים שנקבעו בשיתוף עם המנהל/ת. עדכן/י את ההתקדמות שלך לאורך המחצית.
+      </div>
+    </div>
+
     <div class="section-header">
       <div>
-        <div class="section-title">היעדים שלי H2 2026</div>
+        <div class="section-title">🌱 יעד פיתוח אישי</div>
+        <div class="section-sub">הצע/י יעד אישי — יידון עם המנהל/ת בשיחת המשוב</div>
+      </div>
+    </div>
+
+    ${personalGoal ? `
+    <div class="card" style="margin-bottom:20px;border-color:var(--accent);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:16px;font-weight:700;">${personalGoal.desc}</div>
+          ${personalGoal.kpi ? `<div style="font-size:13px;color:var(--text2);margin-top:4px;">מדד: ${personalGoal.kpi}</div>` : ''}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openPersonalGoalForm()">✏️ עריכה</button>
+      </div>
+    </div>` : `
+    <div class="card" style="margin-bottom:20px;text-align:center;padding:30px;">
+      <div style="font-size:36px;margin-bottom:10px;">🌱</div>
+      <div style="font-weight:700;margin-bottom:6px;">טרם הוספת יעד פיתוח אישי</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">הצע/י יעד שחשוב לך — זה הבסיס לשיחה עם המנהל שלך</div>
+      <button class="btn btn-primary" onclick="openPersonalGoalForm()">+ הוסף יעד אישי</button>
+    </div>`}
+
+    <div class="section-header" style="margin-top:8px;">
+      <div>
+        <div class="section-title">🎯 יעדים מקצועיים H2 2026</div>
         <div class="section-sub">יעדים שנקבעו בשיתוף עם המנהל/ת שלך</div>
       </div>
     </div>
 
     <div id="employee-goals-list">
-      ${myGoals.length === 0
+      ${professionalGoals.length === 0
         ? `<div class="empty-state">
             <div class="empty-icon">📋</div>
-            <div class="empty-text">עדיין לא הוגדרו יעדים</div>
+            <div class="empty-text">עדיין לא הוגדרו יעדים מקצועיים</div>
             <div class="empty-sub">המנהל שלך יוסיף יעדים בקרוב</div>
            </div>`
-        : myGoals.map(g => renderGoalCard(g, false)).join('')
+        : professionalGoals.map(g => renderGoalCard(g, false)).join('')
       }
     </div>
   `;
